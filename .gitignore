@@ -1,0 +1,41 @@
+# .NET 构建产物
+bin/
+obj/
+
+# Visual Studio 临时文件
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code / Rider / VS 工作区
+.vs/
+.idea/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+# 测试结果
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+TestResults/
+
+# 日志
+*.log
+
+# 操作系统
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# 敏感配置（包含密钥的本地配置不应提交）
+appsettings.Local.json
+appsettings.*.Local.json
+*.secret.json
+
+# 分析报告（每次生成可能不同，按需保留；此处选择保留以记录本次实现）
+# ChatService_Implementation_Analysis.txt
