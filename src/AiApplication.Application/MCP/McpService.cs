@@ -14,4 +14,18 @@ namespace AiApplication.Application.MCP
         /// </summary>
         Task<IReadOnlyList<string>> ExecuteToolsAsync(string userMessage, CancellationToken cancellationToken = default);
     }
+
+    /// <summary>
+    /// MCP 服务默认实现。
+    /// 当前为占位实现，直接返回空列表，表示未触发任何工具调用。
+    /// 后续接入 MCP 协议客户端后，替换为真实工具执行逻辑。
+    /// </summary>
+    public sealed class McpService : IMcpService
+    {
+        public Task<IReadOnlyList<string>> ExecuteToolsAsync(string userMessage, CancellationToken cancellationToken = default)
+        {
+            IReadOnlyList<string> empty = System.Array.Empty<string>();
+            return Task.FromResult(empty);
+        }
+    }
 }

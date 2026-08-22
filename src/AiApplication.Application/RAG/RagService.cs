@@ -14,4 +14,18 @@ namespace AiApplication.Application.RAG
         /// </summary>
         Task<IReadOnlyList<string>> RetrieveAsync(string query, CancellationToken cancellationToken = default);
     }
+
+    /// <summary>
+    /// RAG 服务默认实现。
+    /// 当前为占位实现，直接返回空列表，表示未检索到任何知识片段。
+    /// 后续接入向量数据库（如 Milvus）与嵌入服务后，替换为真实检索逻辑。
+    /// </summary>
+    public sealed class RagService : IRagService
+    {
+        public Task<IReadOnlyList<string>> RetrieveAsync(string query, CancellationToken cancellationToken = default)
+        {
+            IReadOnlyList<string> empty = System.Array.Empty<string>();
+            return Task.FromResult(empty);
+        }
+    }
 }

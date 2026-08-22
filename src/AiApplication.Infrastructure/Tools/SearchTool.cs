@@ -1,6 +1,8 @@
+using AiApplication.Application.Abstractions.Tools;
+
 namespace AiApplication.Infrastructure.Tools
 {
-    public class SearchTool
+    public class SearchTool:ITool
     {
     }
 }

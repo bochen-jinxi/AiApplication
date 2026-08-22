@@ -1,6 +1,8 @@
+using AiApplication.Application.Abstractions.Prompt;
+
 namespace AiApplication.Infrastructure.Prompt.Repository
 {
-    public class FilePromptTemplateRepository
+    public class FilePromptTemplateRepository:IPromptTemplateRepository
     {
     }
 }
