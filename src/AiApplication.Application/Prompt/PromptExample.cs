@@ -1,6 +1,17 @@
 namespace AiApplication.Application.Prompt
 {
-    public class PromptExample
+   public sealed class PromptExample
+{
+    public   string Input
     {
+        get;
+        set;
     }
+
+    public   string Output
+    {
+        get;
+        set;
+    }
+}
 }

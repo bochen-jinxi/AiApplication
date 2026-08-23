@@ -15,11 +15,8 @@ namespace AiApplication.Application.Abstractions.AI
         /// <param name="provider">目标提供商。</param>
         /// <returns>对应的 <see cref="IAiClient"/> 实例。</returns>
         /// <exception cref="NotSupportedException">当传入的 <paramref name="provider"/> 未注册时抛出。</exception>
-        IAiClient GetClient(AiProvider provider);
+        IAiClient GetClient(AiProvider provider); 
 
-        /// <summary>
-        /// 根据模型标识获取对应的客户端。等价于 <see cref="GetClient(AiProvider)"/> 传入 <see cref="AiModel.Provider"/>。
-        /// </summary>
-        IAiClient GetClient(AiModel model);
+     
     }
 }

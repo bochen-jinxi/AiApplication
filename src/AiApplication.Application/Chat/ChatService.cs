@@ -36,87 +36,23 @@ namespace AiApplication.Application.Chat
             _mcpService = mcpService;
         }
 
-        public async Task<ChatResponse> ChatAsync(ChatRequest request, CancellationToken cancellationToken = default)
+           public async Task<ChatResponse> ChatAsync(
+        ChatRequest request,
+        CancellationToken cancellationToken)
         {
-            if (request == null)
-            {
-                return ChatResponse.Failure(Error.InvalidArgument("聊天请求不能为空。"));
-            }
 
-            if (string.IsNullOrWhiteSpace(request.UserMessage))
-            {
-                return ChatResponse.Failure(Error.InvalidArgument("用户消息不能为空。"));
-            }
 
-            var context = new ChatContext(request);
+            var client =
+                _provider.GetClient(
+                    request.Provider);
 
-            // 1. RAG 检索
-            if (request.EnableRag && _ragService != null)
-            {
-                var retrieved = await _ragService
-                    .RetrieveAsync(request.UserMessage, cancellationToken)
-                    .ConfigureAwait(false);
-                if (retrieved != null)
-                {
-                    context.RetrievedContexts.AddRange(retrieved);
-                }
-            }
 
-            // 2. 工具调用
-            if (request.EnableTools && _mcpService != null)
-            {
-                var toolResults = await _mcpService
-                    .ExecuteToolsAsync(request.UserMessage, cancellationToken)
-                    .ConfigureAwait(false);
-                if (toolResults != null)
-                {
-                    context.ToolResults.AddRange(toolResults);
-                }
-            }
 
-            // 3. 提示词构建
-            var messages = _promptBuilder.Build(
-                request.SystemPrompt,
-                request.History,
-                request.UserMessage,
-                context.RetrievedContexts,
-                context.ToolResults);
-            context.Messages.AddRange(messages);
+            return await client.ChatAsync(
+                request,
+                cancellationToken);
 
-            // 4. 路由到对应厂商客户端
-            IAiClient client;
-            try
-            {
-                client = _provider.GetClient(request.Provider);
-            }
-            catch (System.Exception ex)
-            {
-                return ChatResponse.Failure(Error.ProviderError($"无法获取 AI 客户端: {ex.Message}"));
-            }
-
-            // 5. 调用 AI
-            var model = request.Model ?? GetDefaultModel(request.Provider);
-            var result = await client
-                .CompleteAsync(model, context.Messages, request.Temperature, request.MaxTokens, cancellationToken)
-                .ConfigureAwait(false);
-
-            if (!result.IsSuccess)
-            {
-                return ChatResponse.Failure(result.Error ?? Error.ProviderError("AI 调用失败。"));
-            }
-
-            return ChatResponse.Success(result.Value.Content, result.Value.Usage);
         }
-
-        private static string GetDefaultModel(AiProvider provider)
-        {
-            switch (provider)
-            {
-                case AiProvider.OpenAI: return "gpt-4o-mini";
-                case AiProvider.Claude: return "claude-3-5-sonnet-20240620";
-                case AiProvider.DeepSeek: return "deepseek-chat";
-                default: return "gpt-4o-mini";
-            }
-        }
+ 
     }
 }

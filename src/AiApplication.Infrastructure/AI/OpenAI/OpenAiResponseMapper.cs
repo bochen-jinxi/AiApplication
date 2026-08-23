@@ -1,57 +1,37 @@
-using System.Text.Json;
-using AiApplication.Application.Abstractions.AI;
+using AiApplication.Application.Chat;
 using AiApplication.Domain.AI;
+using AiApplication.Domain.Common;
+using AiApplication.Infrastructure.AI.OpenAI.Dtos;
 
 namespace AiApplication.Infrastructure.AI.OpenAI
 {
     /// <summary>
-    /// 解析 OpenAI Chat Completions 响应 JSON 为 <see cref="AiCompletion"/>。
+    /// 将 OpenAI Chat Completions 响应 DTO 映射为统一的 <see cref="ChatResponse"/>。
     /// </summary>
-    public sealed class OpenAiResponseParser : IAiResponseParser
+    internal static class OpenAiResponseMapper
     {
-        public AiCompletion Parse(string rawResponse)
+        public static ChatResponse Map(OpenAiChatResponse response)
         {
-            if (string.IsNullOrWhiteSpace(rawResponse))
+            if (response == null)
             {
-                return new AiCompletion(string.Empty, TokenUsage.Empty, "empty");
+                return ChatResponse.Failure(Error.ProviderError("OpenAI 响应为空。"));
             }
 
-            using var doc = JsonDocument.Parse(rawResponse);
-            var root = doc.RootElement;
-
-            string content = string.Empty;
-            string finishReason = null;
-
-            if (root.TryGetProperty("choices", out var choices) && choices.GetArrayLength() > 0)
+            if (response.Choices == null || response.Choices.Count == 0)
             {
-                var firstChoice = choices[0];
-                if (firstChoice.TryGetProperty("message", out var message) &&
-                    message.TryGetProperty("content", out var contentEl) &&
-                    contentEl.ValueKind == JsonValueKind.String)
-                {
-                    content = contentEl.GetString();
-                }
-
-                if (firstChoice.TryGetProperty("finish_reason", out var finishEl) &&
-                    finishEl.ValueKind == JsonValueKind.String)
-                {
-                    finishReason = finishEl.GetString();
-                }
+                return ChatResponse.Failure(Error.ProviderError("OpenAI 没有返回任何回答。"));
             }
+
+            var choice = response.Choices[0];
+            var content = choice.Message?.Content ?? string.Empty;
 
             TokenUsage usage = TokenUsage.Empty;
-            if (root.TryGetProperty("usage", out var usageEl))
+            if (response.Usage != null)
             {
-                int prompt = usageEl.TryGetProperty("prompt_tokens", out var p) && p.ValueKind == JsonValueKind.Number
-                    ? p.GetInt32()
-                    : 0;
-                int completion = usageEl.TryGetProperty("completion_tokens", out var c) && c.ValueKind == JsonValueKind.Number
-                    ? c.GetInt32()
-                    : 0;
-                usage = new TokenUsage(prompt, completion);
+                usage = new TokenUsage(response.Usage.PromptTokens, response.Usage.CompletionTokens);
             }
 
-            return new AiCompletion(content, usage, finishReason);
+            return ChatResponse.Success(content, usage);
         }
     }
 }

@@ -1,6 +1,17 @@
 namespace AiApplication.Application.Prompt
 {
-    public class PromptParameter
+    public sealed class PromptParameter
+{
+    public     string Name
     {
+        get;
+        set;
     }
+
+    public   string Value
+    {
+        get;
+        set;
+    }
+}
 }

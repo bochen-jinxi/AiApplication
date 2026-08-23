@@ -1,6 +1,17 @@
 namespace AiApplication.Application.Prompt
 {
-    public class PromptSection
+   public sealed class PromptSection
+{
+    public   string Name
     {
+        get;
+        set;
     }
+
+    public   string Content
+    {
+        get;
+        set;
+    }
+}
 }

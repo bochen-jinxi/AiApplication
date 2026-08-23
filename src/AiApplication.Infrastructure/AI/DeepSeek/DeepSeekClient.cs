@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AiApplication.Application.Abstractions.AI;
+using AiApplication.Application.Chat;
 using AiApplication.Domain.AI;
 using AiApplication.Domain.Common;
 
@@ -21,70 +23,94 @@ namespace AiApplication.Infrastructure.AI.DeepSeek
 
         public AiProvider Provider => AiProvider.DeepSeek;
 
-        public DeepSeekClient(HttpClient httpClient, DeepSeekOptions options, IAiResponseParser responseParser = null)
+        public DeepSeekClient(HttpClient httpClient, DeepSeekOptions options, IAiResponseParser responseParser)
         {
             _httpClient = httpClient ?? throw new System.ArgumentNullException(nameof(httpClient));
             _options = options ?? throw new System.ArgumentNullException(nameof(options));
-            _responseParser = responseParser ?? new DeepSeekResponseParser();
+            _responseParser = responseParser ?? throw new System.ArgumentNullException(nameof(responseParser));
         }
 
-        public async Task<Result<AiCompletion>> CompleteAsync(
-            string model,
-            IReadOnlyList<AiMessage> messages,
-            double? temperature = null,
-            int? maxTokens = null,
-            CancellationToken cancellationToken = default)
+        public async Task<ChatResponse> ChatAsync(
+            ChatRequest request,
+            CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(model))
+            if (request == null)
             {
-                model = _options.DefaultModel;
-            }
-
-            if (messages == null || messages.Count == 0)
-            {
-                return Result<AiCompletion>.Failure(Error.InvalidArgument("消息列表不能为空。"));
+                throw new System.ArgumentNullException(nameof(request));
             }
 
             if (string.IsNullOrWhiteSpace(_options.ApiKey))
             {
-                return Result<AiCompletion>.Failure(Error.Unauthorized("DeepSeek ApiKey 未配置。"));
+                return ChatResponse.Failure(Error.Unauthorized("DeepSeek ApiKey 未配置。"));
             }
+
+            var messages = BuildMessages(request);
+            if (messages.Count == 0)
+            {
+                return ChatResponse.Failure(Error.InvalidArgument("消息列表不能为空。"));
+            }
+
+            var model = string.IsNullOrWhiteSpace(request.Model) ? _options.DefaultModel : request.Model;
 
             var requestJson = DeepSeekRequestMapper.Map(
                 model,
                 messages,
-                temperature ?? _options.DefaultTemperature,
-                maxTokens ?? _options.DefaultMaxTokens);
+                request.Temperature ?? _options.DefaultTemperature,
+                request.MaxTokens ?? _options.DefaultMaxTokens);
 
-            using var request = new HttpRequestMessage(HttpMethod.Post, "chat/completions")
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "chat/completions")
             {
-                Content = new StringContent(requestJson, System.Text.Encoding.UTF8, "application/json")
+                Content = new StringContent(requestJson, Encoding.UTF8, "application/json")
             };
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _options.ApiKey);
+            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _options.ApiKey);
 
             try
             {
                 using var response = await _httpClient
-                    .SendAsync(request, cancellationToken)
-                    .ConfigureAwait(false);
+                    .SendAsync(
+                        httpRequest,
+                        HttpCompletionOption.ResponseHeadersRead,
+                        cancellationToken);
 
-                var raw = await response.Content
-                    .ReadAsStringAsync()
-                    .ConfigureAwait(false);
+                var raw = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    return Result<AiCompletion>.Failure(
+                    return ChatResponse.Failure(
                         Error.ProviderError($"DeepSeek 调用失败: HTTP {response.StatusCode}, {raw}"));
                 }
 
                 var completion = _responseParser.Parse(raw);
-                return Result<AiCompletion>.Success(completion);
+                return ChatResponse.Success(completion.Content, completion.Usage);
             }
             catch (TaskCanceledException ex) when (!cancellationToken.IsCancellationRequested)
             {
-                return Result<AiCompletion>.Failure(Error.ProviderError($"DeepSeek 请求超时: {ex.Message}"));
+                return ChatResponse.Failure(Error.ProviderError($"DeepSeek 请求超时: {ex.Message}"));
             }
+        }
+
+        private static IReadOnlyList<AiMessage> BuildMessages(ChatRequest request)
+        {
+            var list = new List<AiMessage>();
+            if (!string.IsNullOrWhiteSpace(request.SystemPrompt))
+            {
+                list.Add(AiMessage.System(request.SystemPrompt));
+            }
+
+            if (request.History != null)
+            {
+                foreach (var msg in request.History)
+                {
+                    list.Add(msg);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(request.UserMessage))
+            {
+                list.Add(AiMessage.User(request.UserMessage));
+            }
+
+            return list;
         }
     }
 }

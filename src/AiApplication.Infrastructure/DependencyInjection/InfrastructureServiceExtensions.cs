@@ -26,8 +26,6 @@ namespace AiApplication.Infrastructure.DependencyInjection
         /// <summary>
         /// 注册 Infrastructure 层服务。
         /// </summary>
-        /// <param name="services">服务集合。</param>
-        /// <param name="configuration">应用配置，用于读取 "AI:OpenAI" / "AI:Claude" / "AI:DeepSeek" 节点。</param>
         public static IServiceCollection AddInfrastructure(
             this IServiceCollection services,
             IConfiguration configuration)
@@ -37,94 +35,78 @@ namespace AiApplication.Infrastructure.DependencyInjection
                 throw new ArgumentNullException(nameof(configuration));
             }
 
-            // 1. 绑定并注册 Options（同时注册 IOptions<T> 与 T 单例，便于客户端构造函数直接注入 T）
-            RegisterOptions<OpenAiOptions>(services, configuration, OpenAiOptions.SectionName);
-            RegisterOptions<ClaudeOptions>(services, configuration, ClaudeOptions.SectionName);
-            RegisterOptions<DeepSeekOptions>(services, configuration, DeepSeekOptions.SectionName);
+            // 1. 绑定各厂商 Options
+            services.Configure<OpenAiOptions>(configuration.GetSection("AI:OpenAI"));
+            services.Configure<ClaudeOptions>(configuration.GetSection("AI:Claude"));
+            services.Configure<DeepSeekOptions>(configuration.GetSection("AI:DeepSeek"));
 
             // 2. 注册 HttpClient（通过 IHttpClientFactory 管理生命周期，避免 DNS 老化）
-            services.AddHttpClient<OpenAiClient>(ConfigureOpenAiHttpClient);
-            services.AddHttpClient<ClaudeClient>(ConfigureClaudeHttpClient);
-            services.AddHttpClient<DeepSeekClient>(ConfigureDeepSeekHttpClient);
+            services.AddHttpClient<OpenAiClient>((sp, client) =>
+            {
+                var options = sp.GetRequiredService<IOptions<OpenAiOptions>>().Value;
+                if (!string.IsNullOrWhiteSpace(options.BaseUrl))
+                {
+                    client.BaseAddress = new Uri(options.BaseUrl);
+                }
+                client.Timeout = TimeSpan.FromSeconds(60);
+            });
+            services.AddHttpClient<ClaudeClient>((sp, client) =>
+            {
+                var options = sp.GetRequiredService<IOptions<ClaudeOptions>>().Value;
+                if (!string.IsNullOrWhiteSpace(options.BaseUrl))
+                {
+                    client.BaseAddress = new Uri(options.BaseUrl);
+                }
+                client.Timeout = TimeSpan.FromSeconds(60);
+            });
+            services.AddHttpClient<DeepSeekClient>((sp, client) =>
+            {
+                var options = sp.GetRequiredService<IOptions<DeepSeekOptions>>().Value;
+                if (!string.IsNullOrWhiteSpace(options.BaseUrl))
+                {
+                    client.BaseAddress = new Uri(options.BaseUrl);
+                }
+                client.Timeout = TimeSpan.FromSeconds(60);
+            });
 
             // 3. 注册各厂商响应解析器
-            services.AddSingleton<OpenAiResponseParser>();
             services.AddSingleton<ClaudeResponseParser>();
             services.AddSingleton<DeepSeekResponseParser>();
 
-            services.AddSingleton<IAiClient, OpenAiClient>();
-            services.AddSingleton<IAiClient, ClaudeClient>();
-            services.AddSingleton<IAiClient, DeepSeekClient>(); 
+            // 4. 注册三个 AI 客户端为 IAiClient（多实现注册，AiClientProvider 通过 IEnumerable<IAiClient> 收集）
+            services.AddSingleton<IAiClient>(sp =>
+                sp.GetRequiredService<OpenAiClient>());
+            services.AddSingleton<IAiClient>(sp =>
+                sp.GetRequiredService<ClaudeClient>());
+            services.AddSingleton<IAiClient>(sp =>
+                sp.GetRequiredService<DeepSeekClient>());
 
             // 5. 注册 AI 客户端提供者（路由器）
             services.AddSingleton<IAiClientProvider, AiClientProvider>();
 
             // 6. 注册提示词构建器（默认通用构建器）
-            services.AddSingleton<IPromptBuilder, GeneralChatPromptBuilder>();
 
+services
+    .AddSingleton<
+        IPromptTemplateRepository,
+        MemoryPromptTemplateRepository>();
 
-services.AddSingleton<
-    IPromptTemplateRepository,
-    FilePromptTemplateRepository>();
+services
+    .AddSingleton<
+        IPromptBuilder,
+        HydrologyPromptBuilder>();
 
-services.AddSingleton<
-    IPromptRenderer,
-    PromptRenderer>();
-    services.AddDbContext<AppDbContext>();
+services
+    .AddSingleton<
+        IPromptRenderer,
+        PromptRenderer>();
+
+          //  services.AddSingleton<IPromptBuilder, GeneralChatPromptBuilder>();
+
+            //services.AddSingleton<IPromptTemplateRepository, FilePromptTemplateRepository>();
+            //services.AddSingleton<IPromptRenderer, PromptRenderer>();
+            services.AddDbContext<AppDbContext>();
             return services;
-        }
-
-        /// <summary>
-        /// 同时注册 IOptions&lt;T&gt;（支持 Configure 变更通知）与 T 单例（便于直接注入）。
-        /// </summary>
-        private static void RegisterOptions<T>(
-            IServiceCollection services,
-            IConfiguration configuration,
-            string sectionName)
-            where T : class, new()
-        {
-            // IOptions<T> 标准注册
-            services.Configure<T>(configuration.GetSection(sectionName));
-
-            // T 单例：从 IOptions<T>.Value 解析，供客户端构造函数直接注入
-            services.AddSingleton<T>(sp =>
-            {
-                var options = sp.GetRequiredService<IOptions<T>>();
-                return options.Value ?? new T();
-            });
-        }
-
-        private static void ConfigureOpenAiHttpClient(
-            IServiceProvider sp,
-            System.Net.Http.HttpClient client)
-        {
-            var options = sp.GetRequiredService<OpenAiOptions>();
-            if (!string.IsNullOrWhiteSpace(options.BaseUrl))
-            {
-                client.BaseAddress = new Uri(options.BaseUrl);
-            }
-        }
-
-        private static void ConfigureClaudeHttpClient(
-            IServiceProvider sp,
-            System.Net.Http.HttpClient client)
-        {
-            var options = sp.GetRequiredService<ClaudeOptions>();
-            if (!string.IsNullOrWhiteSpace(options.BaseUrl))
-            {
-                client.BaseAddress = new Uri(options.BaseUrl);
-            }
-        }
-
-        private static void ConfigureDeepSeekHttpClient(
-            IServiceProvider sp,
-            System.Net.Http.HttpClient client)
-        {
-            var options = sp.GetRequiredService<DeepSeekOptions>();
-            if (!string.IsNullOrWhiteSpace(options.BaseUrl))
-            {
-                client.BaseAddress = new Uri(options.BaseUrl);
-            }
         }
     }
 }

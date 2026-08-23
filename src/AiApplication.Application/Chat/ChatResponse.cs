@@ -8,9 +8,45 @@ namespace AiApplication.Application.Chat
     /// </summary>
     public sealed class ChatResponse
     {
+
+ public   string Content
+    {
+        get;
+        set;
+    }
+
+    public   string Model
+    {
+        get;
+        set;
+    }
+
+    public int PromptTokens
+    {
+        get;
+        set;
+    }
+
+    public int CompletionTokens
+    {
+        get;
+        set;
+    }
+
+    public string? FinishReason
+    {
+        get;
+        set;
+    }
+
+
+    public string Provider { get; set; }
+
+    public int TotalTokens { get; set; }
+
         public bool IsSuccess { get; }
 
-        public string Content { get; }
+     
 
         public TokenUsage Usage { get; }
 

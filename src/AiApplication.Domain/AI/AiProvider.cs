@@ -7,6 +7,18 @@ namespace AiApplication.Domain.AI
     {
         OpenAI = 0,
         Claude = 1,
-        DeepSeek = 2
+        AzureOpenAI = 2,
+
+
+    Gemini = 3,
+
+
+    DeepSeek = 4,
+
+
+    Qwen = 5,
+
+
+    Ollama = 6
     }
 }

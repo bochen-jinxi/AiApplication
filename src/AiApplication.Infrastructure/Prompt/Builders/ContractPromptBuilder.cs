@@ -1,15 +1,27 @@
-using System.Collections.Generic;
 using AiApplication.Application.Abstractions.Prompt;
-using AiApplication.Domain.AI;
+using AiApplication.Application.Chat;
+using AiApplication.Application.Prompt;
 
 namespace AiApplication.Infrastructure.Prompt.Builders
 {
+    /// <summary>
+    /// 合同领域专用提示词构建器。
+    /// </summary>
     public class ContractPromptBuilder : IPromptBuilder
     {
-        public IReadOnlyList<AiMessage> Build(string systemPrompt, IReadOnlyList<AiMessage> history, string userMessage, IReadOnlyList<string> ragContexts = null, IReadOnlyList<string> toolResults = null)
+        public ChatMessage BuildSystemPrompt(PromptRequest request)
         {
-            throw new System.NotImplementedException();
+            return new ChatMessage();
         }
 
+        public ChatMessage BuildUserPrompt(PromptRequest request)
+        {
+            return new ChatMessage();
+        }
+
+        public PromptDocument Build(PromptRequest request)
+        {
+            return new PromptDocument();
+        }
     }
 }

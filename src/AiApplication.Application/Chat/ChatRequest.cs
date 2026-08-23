@@ -6,7 +6,7 @@ namespace AiApplication.Application.Chat
     /// <summary>
     /// 聊天请求。由 API 层构造，传入 <see cref="IChatService"/>。
     /// </summary>
-    public sealed class ChatRequest
+    public   class ChatRequest
     {
         /// <summary>
         /// 用户输入的原始文本。
