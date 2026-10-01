@@ -1,35 +1,43 @@
-namespace AiApplication.Infrastructure.AI.OpenAI
-{
-    /// <summary>
-    /// OpenAI 客户端配置。通常从 appsettings.json 的 "AI:OpenAI" 节点绑定。
-    /// </summary>
-    public sealed class OpenAiOptions
-    {
-        public const string SectionName = "AI:OpenAI";
+//namespace AiApplication.Infrastructure.AI.OpenAI
+//{
+//    /// <summary>
+//    /// OpenAI 配置。
+//    /// </summary>
+//    public sealed class OpenAiOptions
+//    {
+//        /// <summary>
+//        /// API Key。
+//        /// </summary>
+//        public string ApiKey { get; set; }
 
-        /// <summary>
-        /// API 密钥。
-        /// </summary>
-        public string ApiKey { get; set; }
+//        /// <summary>
+//        /// 基础 URL。
+//        /// </summary>
+//        public string BaseUrl { get; set; } = "https://api.openai.com/v1";
 
-        /// <summary>
-        /// API 基址。默认 https://api.openai.com/v1，可改为代理地址。
-        /// </summary>
-        public string BaseUrl { get; set; } = "https://api.openai.com/v1";
+//        /// <summary>
+//        /// Chat Completions 路径。
+//        /// </summary>
+//        public string ChatCompletionsPath { get; set; } = "/v1/chat/completions";
 
-        /// <summary>
-        /// 默认模型名称。
-        /// </summary>
-        public string DefaultModel { get; set; } = "gpt-4o-mini";
+//        /// <summary>
+//        /// 默认模型。
+//        /// </summary>
+//        public string DefaultModel { get; set; }
 
-        /// <summary>
-        /// 默认采样温度。
-        /// </summary>
-        public double DefaultTemperature { get; set; } = 0.7;
+//        /// <summary>
+//        /// 默认系统提示词。
+//        /// </summary>
+//        public string DefaultSystemPrompt { get; set; }
 
-        /// <summary>
-        /// 默认最大生成 Token 数。
-        /// </summary>
-        public int? DefaultMaxTokens { get; set; }
-    }
-}
+//        /// <summary>
+//        /// 默认温度。
+//        /// </summary>
+//        public double DefaultTemperature { get; set; } = 0.2d;
+
+//        /// <summary>
+//        /// 默认最大 Token 数。
+//        /// </summary>
+//        public int DefaultMaxTokens { get; set; } = 4096;
+//    }
+//}

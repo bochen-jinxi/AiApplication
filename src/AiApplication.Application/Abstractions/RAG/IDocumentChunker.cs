@@ -1,4 +1,4 @@
-namespace AiApplication.Application.Abstractions.RAG
+namespace AiApplication.Application.Abstractions.Rag
 {
     public interface IDocumentChunker
     {

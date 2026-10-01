@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 18
+VisualStudioVersion = 18.9.12120.119 stable
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{26A2572A-380E-41F1-8096-811C37EBC27B}"
 EndProject
@@ -31,9 +31,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{99260C57-ED2C-44AF-BA62-E2F35891F2C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -133,6 +130,9 @@ Global
 		{76BBED12-8E75-4547-8FE4-09B34A42337E}.Release|x86.ActiveCfg = Release|Any CPU
 		{76BBED12-8E75-4547-8FE4-09B34A42337E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{99260C57-ED2C-44AF-BA62-E2F35891F2C6} = {26A2572A-380E-41F1-8096-811C37EBC27B}
 		{C1CC1B5A-67C3-4C39-A2BB-C786CFE54DD4} = {26A2572A-380E-41F1-8096-811C37EBC27B}
@@ -142,5 +142,8 @@ Global
 		{D7BC5C90-B2D8-4419-877F-A74AF41DB902} = {5A573084-CDFC-4993-8F87-08C2BDA4BA1E}
 		{E5B5E146-A822-45D3-B0EC-E7832CDF7B3D} = {5A573084-CDFC-4993-8F87-08C2BDA4BA1E}
 		{76BBED12-8E75-4547-8FE4-09B34A42337E} = {5A573084-CDFC-4993-8F87-08C2BDA4BA1E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FF21134A-A1F1-42B7-9E75-81D6770CC3D9}
 	EndGlobalSection
 EndGlobal

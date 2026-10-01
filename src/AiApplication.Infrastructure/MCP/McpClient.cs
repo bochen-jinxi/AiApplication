@@ -1,4 +1,4 @@
-using AiApplication.Application.Abstractions.MCP;
+using AiApplication.Application.Abstractions.Mcp;
 
 namespace AiApplication.Infrastructure.MCP
 {

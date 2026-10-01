@@ -1,4 +1,4 @@
-using AiApplication.Application.Abstractions.RAG;
+using AiApplication.Application.Abstractions.Rag;
 
 namespace AiApplication.Infrastructure.RAG.Embedding
 {

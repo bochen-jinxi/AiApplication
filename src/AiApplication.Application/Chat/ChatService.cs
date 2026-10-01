@@ -1,58 +1,71 @@
-using System.Threading;
-using System.Threading.Tasks;
-using AiApplication.Application.Abstractions.AI;
-using AiApplication.Application.Abstractions.Prompt;
-using AiApplication.Application.MCP;
-using AiApplication.Application.RAG;
-using AiApplication.Domain.AI;
-using AiApplication.Domain.Common;
+//using System;
+//using System.Threading;
+//using System.Threading.Tasks;
+//using AiApplication.Application.Abstractions.AI;
+//using Microsoft.Extensions.Logging;
 
-namespace AiApplication.Application.Chat
-{
-    /// <summary>
-    /// 聊天服务实现。编排完整的对话流程：
-    /// 1. RAG 检索（可选）—— 根据用户输入检索知识片段；
-    /// 2. 工具调用（可选）—— 执行 MCP 工具获取外部数据；
-    /// 3. 提示词构建 —— 将 system / history / user / rag / tool 组装为消息列表；
-    /// 4. AI 调用 —— 通过 <see cref="IAiClientProvider"/> 路由到具体厂商客户端；
-    /// 5. 结果封装 —— 返回统一的 <see cref="ChatResponse"/>。
-    /// </summary>
-    public sealed class ChatService : IChatService
-    {
-        private readonly IAiClientProvider _provider;
-        private readonly IPromptBuilder _promptBuilder;
-        private readonly IRagService _ragService;
-        private readonly IMcpService _mcpService;
+//namespace AiApplication.Application.Chat
+//{
+//    /// <summary>
+//    /// 聊天服务。
+//    ///
+//    /// 职责：
+//    /// 1. 接收 API 层传入的 ChatRequest。
+//    /// 2. 根据 Provider 选择对应的 AI Client。
+//    /// 3. 将请求交给 AI Client 执行。
+//    /// 4. 返回统一的 ChatResponse。
+//    ///
+//    /// 说明：
+//    /// 该类只负责应用层编排，
+//    /// 不直接依赖 OpenAI、Claude、DeepSeek 等具体实现。
+//    /// </summary>
+//    public sealed class ChatService : IChatService
+//    {
+//        private readonly IAiClientProvider _aiClientProvider;
+//        private readonly ILogger<ChatService> _logger;
 
-        public ChatService(
-            IAiClientProvider provider,
-            IPromptBuilder promptBuilder,
-            IRagService ragService = null,
-            IMcpService mcpService = null)
-        {
-            _provider = provider ?? throw new System.ArgumentNullException(nameof(provider));
-            _promptBuilder = promptBuilder ?? throw new System.ArgumentNullException(nameof(promptBuilder));
-            _ragService = ragService;
-            _mcpService = mcpService;
-        }
+//        /// <summary>
+//        /// 初始化聊天服务。
+//        /// </summary>
+//        /// <param name="aiClientProvider">AI 客户端提供者。</param>
+//        /// <param name="logger">日志对象。</param>
+//        public ChatService(IAiClientProvider aiClientProvider, ILogger<ChatService> logger)
+//        {
+//            _aiClientProvider = aiClientProvider ?? throw new ArgumentNullException(nameof(aiClientProvider));
+//            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+//        }
 
-           public async Task<ChatResponse> ChatAsync(
-        ChatRequest request,
-        CancellationToken cancellationToken)
-        {
+//        /// <summary>
+//        /// 执行聊天请求。
+//        /// </summary>
+//        /// <param name="request">聊天请求。</param>
+//        /// <param name="cancellationToken">取消令牌。</param>
+//        /// <returns>聊天响应。</returns>
+//        public async Task<ChatResponse> ChatAsync(ChatRequest request, CancellationToken cancellationToken)
+//        {
+//            if (request == null)
+//            {
+//                throw new ArgumentNullException(nameof(request));
+//            }          
 
+//            _logger.LogInformation(
+//                "开始处理聊天请求，Provider={0}, Model={1},  EnableRag={4}, EnableTools={5}",
+//                request.Provider,
+//                request.Model,
+//                request.EnableRag,
+//                request.EnableTools);
 
-            var client =
-                _provider.GetClient(
-                    request.Provider);
+//            var client = _aiClientProvider.GetClient(request.Provider);
 
+//            var response = await client.ChatAsync(request, cancellationToken);
 
+//            _logger.LogInformation(
+//                "聊天请求处理完成，Provider={0}, Success={1}, TotalTokens={2}",
+//                response.Provider,
+//                response.IsSuccess,
+//                response.TotalTokens);
 
-            return await client.ChatAsync(
-                request,
-                cancellationToken);
-
-        }
- 
-    }
-}
+//            return response;
+//        }
+//    }
+//}

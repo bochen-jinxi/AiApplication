@@ -1,13 +1,13 @@
-using System.Collections.Generic;
+//using System.Collections.Generic;
 
-namespace AiApplication.Application.Prompt
-{
-    public class PromptDocument
-    {
-         public List<PromptSection> Sections
-    {
-        get;
-    }
-    = new List<PromptSection>();
-    }
-}
+//namespace AiApplication.Application.Prompt
+//{
+//    public class PromptDocument
+//    {
+//         public List<PromptSection> Sections
+//    {
+//        get;
+//    }
+//    = new List<PromptSection>();
+//    }
+//}

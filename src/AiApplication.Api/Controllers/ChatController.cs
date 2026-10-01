@@ -1,31 +1,64 @@
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
-using AiApplication.Application.Chat;
+using AiApplication.Application.Abstractions;
+using AiApplication.Application.Enums;
+using AiApplication.Application.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AiApplication.Api.Controllers
+namespace AiApplication.WebApi.Controllers
 {
+    /// <summary>
+    /// AI 聊天接口。
+    /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
-    public class ChatController : ControllerBase
+    [Route("api/chat")]
+    public sealed class ChatController : ControllerBase
     {
-        private readonly IChatService _chatService;
+        /// <summary>
+        /// AI Client Provider。
+        /// </summary>
+        private readonly IAiClientProvider _clientProvider;
 
-        public ChatController(IChatService chatService)
+        /// <summary>
+        /// 初始化 Controller。
+        /// </summary>
+        /// <param name="clientProvider">
+        /// AI Client Provider。
+        /// </param>
+        public ChatController(IAiClientProvider clientProvider)
         {
-            _chatService = chatService;
+            _clientProvider = clientProvider ?? throw new ArgumentNullException(nameof(clientProvider));
         }
 
+        /// <summary>
+        /// 聊天。
+        /// </summary>
+        /// <returns>
+        /// ChatCompletionResult。
+        /// </returns>
         [HttpPost]
-        public async Task<IActionResult> Chat(ChatRequest request)
+        public async Task<ActionResult<ChatCompletionResult>> Chat()
         {
-            if (request == null)
+            ChatCompletionRequest request = new ChatCompletionRequest
             {
-                return BadRequest("请求体不能为空。");
-            }
+                Temperature = (float)0.7,
+                TopP = 1,
+                MaxTokens = 1024,
+                Stream = false,
+                Messages = new System.Collections.Generic.List<ChatMessage>()
+            };
 
-            var result = await _chatService.ChatAsync(
-                request,
-                HttpContext.RequestAborted);
+
+            request.Messages.Add(new ChatMessage
+            {
+                Role = MessageRole.User,
+                Content = "你好，请介绍一下你自己。"
+            });
+
+            IAiClient client = _clientProvider.GetClient(AiProvider.OpenAI);
+
+            ChatCompletionResult result = await client.ChatAsync(request, CancellationToken.None);
 
             return Ok(result);
         }

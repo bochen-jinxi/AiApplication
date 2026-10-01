@@ -1,4 +1,4 @@
-namespace AiApplication.Application.RAG
+namespace AiApplication.Application.Rag
 {
     public class RetrievedDocument
     {

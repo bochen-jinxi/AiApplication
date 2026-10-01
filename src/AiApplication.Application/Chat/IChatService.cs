@@ -1,16 +1,30 @@
-using System.Threading;
-using System.Threading.Tasks;
+//using System.Threading;
+//using System.Threading.Tasks;
 
-namespace AiApplication.Application.Chat
-{
-    /// <summary>
-    /// 聊天服务抽象。编排"提示词构建 → RAG 检索 → 工具调用 → AI 调用"的完整链路。
-    /// </summary>
-    public interface IChatService
-    {
-        /// <summary>
-        /// 处理一次聊天请求。
-        /// </summary>
-        Task<ChatResponse> ChatAsync(ChatRequest request, CancellationToken cancellationToken = default);
-    }
-}
+//namespace AiApplication.Application.Chat
+//{
+//    /// <summary>
+//    /// 聊天服务抽象。
+//    ///
+//    /// 职责：
+//    /// 1. 接收 API 层传入的 ChatRequest。
+//    /// 2. 编排 RAG、MCP、Prompt、AI Client 等流程。
+//    /// 3. 返回统一 ChatResponse。
+//    /// </summary>
+//    public interface IChatService
+//    {
+//        /// <summary>
+//        /// 执行聊天请求。
+//        /// </summary>
+//        /// <param name="request">
+//        /// 聊天请求。
+//        /// </param>
+//        /// <param name="cancellationToken">
+//        /// 取消令牌。
+//        /// </param>
+//        /// <returns>
+//        /// 聊天响应。
+//        /// </returns>
+//        Task<ChatResponse> ChatAsync(ChatRequest request, CancellationToken cancellationToken);
+//    }
+//}

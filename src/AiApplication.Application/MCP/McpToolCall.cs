@@ -1,4 +1,4 @@
-namespace AiApplication.Application.MCP
+namespace AiApplication.Application.Mcp
 {
     public class McpToolCall
     {
