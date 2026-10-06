@@ -44,10 +44,10 @@ namespace AiApplication.Api
             services.AddSingleton<IAiSerializer, SystemTextJsonSerializer>();
 
             // 注册 OpenAI Client
-            services.AddSingleton<OpenAiClient>();
-
+           // services.AddSingleton<OpenAiClient>();
+            services.AddSingleton<IAiClient,OpenAiClient>();
             // 注册 IAiClient
-            services.AddSingleton<IAiClient>(sp => sp.GetRequiredService<OpenAiClient>());
+            //services.AddSingleton<IAiClient>(sp => sp.GetRequiredService<OpenAiClient>());
 
             // 注册 Client Provider
             services.AddSingleton<IAiClientProvider, AiClientProvider>();

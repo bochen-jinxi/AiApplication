@@ -71,7 +71,9 @@ namespace AiApplication.Infrastructure.AI
             }
 
             OpenAiChatCompletionRequest openAiRequest = BuildRequest(request);
-
+            /*
+             {"model":"gpt-5.6-luna","messages":[{"role":"user","content":"\u4F60\u597D\uFF0C\u8BF7\u4ECB\u7ECD\u4E00\u4E0B\u4F60\u81EA\u5DF1\u3002"}],"temperature":0.7,"max_tokens":1024,"top_p":1,"stream":false}
+             */
             string requestJson = _serializer.Serialize(openAiRequest);
             /*
              {"id":"chatcmpl-da76ee9d31ed4867b83ad0ef",
