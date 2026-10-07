@@ -227,3 +227,71 @@
   推送脚本: c:\AiApplication\push-to-github.ps1
   分析报告: c:\AiApplication\推送任务分析结果.txt
 ==============================================================
+
+==============================================================
+  附：Git 标签 1.0 添加任务（2026-10-07）
+==============================================================
+
+附一、任务请求
+--------------------------------------------------------------
+1. 原始请求：为已推送的 https://github.com/bochen-jinxi/AiApplication 添加标签 1.0
+2. 任务性质：Git 标签操作（非代码研发），直接执行
+3. 目标：在当前 HEAD 提交上创建标签 1.0 并推送到 GitHub
+
+附二、操作前状态检查
+--------------------------------------------------------------
+1. 当前分支：master
+2. 最新提交：680d977 docs: 更新分析报告为推送完成最终版
+3. 现有标签：无（git tag -l 为空，不会冲突）
+4. 远程配置：origin → https://github.com/bochen-jinxi/AiApplication.git
+
+附三、标签创建
+--------------------------------------------------------------
+1. 标签类型：带注释标签（annotated tag，git tag -a）
+   - 比轻量标签更规范，包含 tagger、日期、注释信息
+   - GitHub 上会显示为 "Release" 形式
+2. 标签名：1.0
+3. 标签注释：
+   "Release version 1.0
+    AiApplication - ASP.NET Core 3.1 AI 应用 (分层架构)
+    - 多厂商 AI 客户端集成 (OpenAI/Claude/DeepSeek)
+    - Weather 模块与 HTTP 传输层
+    - 分层架构 (Api/Application/Infrastructure)"
+4. 指向提交：680d977f5bf83cdf4d7f4e404013124136eb9bbf（当前 HEAD）
+5. Tagger：2984294503@qq.com <2984294503@qq.com>
+6. 创建时间：Wed Oct 7 09:39:13 2026 +0800
+
+附四、标签推送
+--------------------------------------------------------------
+1. 命令：git push origin 1.0
+2. 输出：* [new tag] 1.0 -> 1.0
+3. EXIT=0（成功）
+
+附五、验证结果
+--------------------------------------------------------------
+1. 本地标签：git tag -l → 1.0 ✅
+2. 远程标签：git ls-remote --tags origin
+   - refs/tags/1.0（标签对象 e84c2124980f132b7dac80fcb997289671d4d703）
+   - refs/tags/1.0^{}（指向提交 680d977f5bf83cdf4d7f4e404013124136eb9bbf）✅
+3. 标签指向提交：680d977（与当前 HEAD 一致）✅
+
+附六、GitHub 上的访问地址
+--------------------------------------------------------------
+1. 标签页面：https://github.com/bochen-jinxi/AiApplication/releases/tag/1.0
+2. 标签列表：https://github.com/bochen-jinxi/AiApplication/tags
+3. Releases 列表：https://github.com/bochen-jinxi/AiApplication/releases
+
+附七、结论
+--------------------------------------------------------------
+✅ 标签 1.0 已成功创建并推送到 GitHub
+- 标签类型：带注释标签（annotated）
+- 指向提交：680d977
+- 远程已同步：refs/tags/1.0
+- 可在 GitHub Releases 页面查看
+
+==============================================================
+  ✅ 标签任务完成
+  仓库: https://github.com/bochen-jinxi/AiApplication
+  标签: 1.0 (annotated, 指向 680d977)
+  标签地址: https://github.com/bochen-jinxi/AiApplication/releases/tag/1.0
+==============================================================
