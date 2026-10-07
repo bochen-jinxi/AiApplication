@@ -295,3 +295,99 @@
   标签: 1.0 (annotated, 指向 680d977)
   标签地址: https://github.com/bochen-jinxi/AiApplication/releases/tag/1.0
 ==============================================================
+
+==============================================================
+  附二：代码提交与推送任务（2026-10-07）
+==============================================================
+
+附二.一、任务请求
+--------------------------------------------------------------
+1. 原始请求：将当前项目提交到本地并推送到 https://github.com/bochen-jinxi/AiApplication
+2. 任务性质：Git 提交+推送操作（非代码研发），直接执行
+3. 目标：提交所有改动到本地 master 分支，再推送到 GitHub 远程
+
+附二.二、工作区改动分析
+--------------------------------------------------------------
+1. 已修改文件（9 个，298 行新增 / 143 行删除）：
+   - src/AiApplication.Api/AiApplication.Api.csproj
+   - src/AiApplication.Api/Controllers/ChatController.cs
+   - src/AiApplication.Api/Startup.cs
+   - src/AiApplication.Application/Abstractions/IAiClient.cs
+   - src/AiApplication.Application/Abstractions/IAiHttpTransport.cs
+   - src/AiApplication.Application/AiApplication.Application.csproj
+   - src/AiApplication.Application/Models/OpenAI/OpenAiChatCompletionRequest.cs
+   - src/AiApplication.Infrastructure/AI/OpenAiClient.cs（大改 +281/-143）
+   - src/AiApplication.Infrastructure/Http/AiHttpTransport.cs
+2. 新增源代码文件（13 个）：
+   - StreamingChatController.cs（流式聊天控制器）
+   - wwwroot/stream.html（流式聊天测试页面）
+   - Exceptions/AiException.cs、AiHttpException.cs、AiAuthenticationException.cs（异常体系）
+   - Models/Http/HttpResponse.cs（HTTP 模型）
+   - Models/OpenAI/OpenAiChatCompletionChunk.cs、OpenAiChunkChoice.cs、OpenAiDelta.cs
+   - Models/OpenAI/OpenAiError.cs、OpenAiErrorResponse.cs（错误模型）
+   - Models/OpenAI/OpenAiStreamingChatCompletionRequest.cs、StreamingChatChunk.cs（流式请求/响应）
+3. 误创建文件（已排除）：
+   - src.zip（337KB 源码压缩包，不应纳入版本控制）
+
+附二.三、.gitignore 更新
+--------------------------------------------------------------
+1. 新增排除规则：
+   - *.zip
+   - *.rar
+   - *.7z
+2. 原因：src.zip 是源码打包文件，不应提交到 Git 仓库
+3. 验证：git check-ignore -v src.zip → .gitignore:41:*.zip	src.zip ✅
+
+附二.四、本地提交
+--------------------------------------------------------------
+1. 提交哈希：1470cbc
+2. 提交信息：
+   "feat: 新增流式聊天功能、异常体系与 HTTP 模型
+    - 新增 StreamingChatController 与流式聊天请求/响应模型
+    - 新增异常体系（AiException/AiHttpException/AiAuthenticationException）
+    - 新增 HTTP 模型（HttpResponse）与 OpenAI 错误模型
+    - 重构 OpenAiClient（+281/-143），增强流式支持与错误处理
+    - 重构 AiHttpTransport 与 IAiHttpTransport 抽象
+    - 新增 wwwroot/stream.html 流式聊天测试页面
+    - .gitignore 排除压缩包文件（*.zip/*.rar/*.7z）"
+3. 变更统计：23 files changed, 824 insertions(+), 143 deletions(-)
+
+附二.五、推送到 GitHub
+--------------------------------------------------------------
+1. 命令：git push origin master
+2. 输出：260badc..1470cbc  master -> master
+3. EXIT=0（成功）
+4. 推送方式：GCM 缓存凭据（无需 PAT）
+
+附二.六、最终验证
+--------------------------------------------------------------
+1. 工作区状态：nothing to commit, working tree clean ✅
+2. 本地与远程同步：up to date with 'origin/master' ✅
+3. 远程 HEAD：1470cbc3474a836bb865d28333125e8b9d890329（与本地一致）✅
+4. 标签 1.0 仍存在：指向 680d977（未受影响）✅
+5. 跟踪文件总数：210 个（之前 197 + 新增 13）
+
+附二.七、提交历史（最新 5 次）
+--------------------------------------------------------------
+- 1470cbc feat: 新增流式聊天功能、异常体系与 HTTP 模型  [本次新增]
+- 260badc docs: 追加标签1.0添加任务的分析报告
+- 680d977 docs: 更新分析报告为推送完成最终版
+- 008510b docs: 更新分析报告为最终版并添加 GitHub 推送脚本
+- c2ceaf8 fix: 调整 OpenAiClient DI 注册方式并添加推送任务分析报告
+
+附二.八、结论
+--------------------------------------------------------------
+✅ 所有改动已成功提交到本地并推送到 GitHub
+- 本地提交：1470cbc（23 文件，+824/-143）
+- 远程同步：origin/master = 1470cbc
+- 工作区干净，无未提交改动
+- src.zip 已被 .gitignore 排除，未误提交
+- 标签 1.0 保持不变（指向 680d977）
+
+==============================================================
+  ✅ 提交+推送任务完成
+  仓库: https://github.com/bochen-jinxi/AiApplication
+  最新提交: 1470cbc (feat: 新增流式聊天功能、异常体系与 HTTP 模型)
+  跟踪文件: 210 个
+  分支: master (与 origin/master 同步)
+==============================================================
