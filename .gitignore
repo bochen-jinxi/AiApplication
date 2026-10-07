@@ -37,5 +37,10 @@ appsettings.Local.json
 appsettings.*.Local.json
 *.secret.json
 
+# 压缩包（源码打包文件不应纳入版本控制）
+*.zip
+*.rar
+*.7z
+
 # 分析报告（每次生成可能不同，按需保留；此处选择保留以记录本次实现）
 # ChatService_Implementation_Analysis.txt

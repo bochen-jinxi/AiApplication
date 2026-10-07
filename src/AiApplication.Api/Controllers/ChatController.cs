@@ -1,10 +1,12 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using AiApplication.Application.Abstractions;
+﻿using AiApplication.Application.Abstractions;
 using AiApplication.Application.Enums;
 using AiApplication.Application.Models;
+using AiApplication.Application.Models.OpenAI;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace AiApplication.WebApi.Controllers
 {
@@ -62,5 +64,6 @@ namespace AiApplication.WebApi.Controllers
 
             return Ok(result);
         }
+         
     }
 }

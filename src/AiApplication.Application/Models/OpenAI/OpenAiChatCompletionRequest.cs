@@ -43,5 +43,6 @@ namespace AiApplication.Application.Models.OpenAI
         /// </summary>
         [JsonPropertyName("stream")]
         public bool Stream { get; set; }
+      
     }
 }

@@ -33,6 +33,8 @@ namespace AiApplication.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+           
             // 注册共享的 JsonSerializerOptions，供 OpenAiResponseParser 等服务注入
             services.AddSingleton(SharedJsonOptions);
 
@@ -86,6 +88,7 @@ namespace AiApplication.Api
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseStaticFiles();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

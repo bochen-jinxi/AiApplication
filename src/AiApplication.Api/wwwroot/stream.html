@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <title>AI Streaming Demo</title>
+
+    <style>
+
+        body {
+            font-family: Consolas;
+            margin:40px;
+        }
+
+        textarea {
+            width:700px;
+            height:120px;
+        }
+
+        #result{
+            width:700px;
+            min-height:200px;
+            border:1px solid #cccccc;
+            margin-top:20px;
+            padding:10px;
+            white-space:pre-wrap;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<h2>Streaming Chat</h2>
+
+<textarea id="prompt">介绍一下 ASP.NET Core</textarea>
+
+<br />
+<br />
+
+<button onclick="send()">发送</button>
+
+<div id="result"></div>
+
+<script>
+
+async function send()
+{
+    document.getElementById("result").textContent = "";
+
+    const response =
+        await fetch("/api/chat/stream",
+        {
+            method:"POST",
+
+            headers:
+            {
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify(
+            {
+                messages:[
+                {
+                    role:1,
+                    content:document.getElementById("prompt").value
+                }]
+            })
+        });
+
+    const reader =
+        response.body.getReader();
+
+    const decoder =
+        new TextDecoder();
+
+    while(true)
+    {
+        const { done, value } =
+            await reader.read();
+
+        if(done)
+        {
+            break;
+        }
+
+        const text =
+            decoder.decode(value);
+
+        document.getElementById("result").textContent += text;
+    }
+
+}
+
+</script>
+
+</body>
+
+</html>

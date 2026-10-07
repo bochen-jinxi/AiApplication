@@ -10,4 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AiApplication.Domain\AiApplication.Domain.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\Streaming\" />
+  </ItemGroup>
 </Project>

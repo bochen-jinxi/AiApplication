@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AiApplication.Application.Abstractions;
@@ -9,20 +7,20 @@ using AiApplication.Application.Abstractions;
 namespace AiApplication.Infrastructure.Http
 {
     /// <summary>
-    /// AI HTTP 传输实现。
+    /// AI HTTP 传输层。
     /// </summary>
     public sealed class AiHttpTransport : IAiHttpTransport
     {
         /// <summary>
-        /// HttpClient 工厂。
+        /// HttpClientFactory。
         /// </summary>
         private readonly IHttpClientFactory _httpClientFactory;
 
         /// <summary>
-        /// 初始化 HTTP 传输层。
+        /// 初始化 AI HTTP 传输层。
         /// </summary>
         /// <param name="httpClientFactory">
-        /// HttpClient 工厂。
+        /// IHttpClientFactory。
         /// </param>
         public AiHttpTransport(IHttpClientFactory httpClientFactory)
         {
@@ -32,86 +30,30 @@ namespace AiApplication.Infrastructure.Http
         /// <summary>
         /// 发送 POST 请求。
         /// </summary>
-        /// <param name="url">
-        /// 请求地址。
-        /// </param>
-        /// <param name="json">
-        /// JSON 请求内容。
-        /// </param>
-        /// <param name="apiKey">
-        /// API Key。
+        /// <param name="request">
+        /// HTTP 请求。
         /// </param>
         /// <param name="cancellationToken">
-        /// 取消令牌。
+        /// CancellationToken。
         /// </param>
         /// <returns>
-        /// HTTP 响应字符串。
+        /// HttpResponseMessage。
         /// </returns>
-        public async Task<string> PostAsync(
-            string url,
-            string json,
-            string apiKey,
-            CancellationToken cancellationToken)
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            EnsureNotEmpty(url, nameof(url));
-            EnsureNotEmpty(json, nameof(json));
-            EnsureNotEmpty(apiKey, nameof(apiKey));
-
-            HttpClient httpClient = _httpClientFactory.CreateClient();
-
-            using HttpRequestMessage request = CreatePostRequest(url, json, apiKey);
-
-            using HttpResponseMessage response = await httpClient.SendAsync(request, cancellationToken);
-
-            response.EnsureSuccessStatusCode();
-
-            return await response.Content.ReadAsStringAsync();
-        }
-
-        /// <summary>
-        /// 创建 POST 请求。
-        /// </summary>
-        /// <param name="url">
-        /// 请求地址。
-        /// </param>
-        /// <param name="json">
-        /// JSON 请求内容。
-        /// </param>
-        /// <param name="apiKey">
-        /// API Key。
-        /// </param>
-        /// <returns>
-        /// HttpRequestMessage。
-        /// </returns>
-        private static HttpRequestMessage CreatePostRequest(
-            string url,
-            string json,
-            string apiKey)
-        {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
-
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-
-            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            return request;
-        }
-
-        /// <summary>
-        /// 验证字符串不能为空。
-        /// </summary>
-        /// <param name="value">
-        /// 字符串。
-        /// </param>
-        /// <param name="parameterName">
-        /// 参数名称。
-        /// </param>
-        private static void EnsureNotEmpty(string value, string parameterName)
-        {
-            if (string.IsNullOrWhiteSpace(value))
+            if (request == null)
             {
-                throw new ArgumentException($"{parameterName} 不能为空。", parameterName);
+                throw new ArgumentNullException(nameof(request));
             }
+
+            HttpClient client = _httpClientFactory.CreateClient();
+
+            HttpResponseMessage response = await client.SendAsync(
+                request,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken);
+
+            return response;
         }
     }
 }

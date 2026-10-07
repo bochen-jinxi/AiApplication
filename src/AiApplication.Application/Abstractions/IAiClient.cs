@@ -1,6 +1,8 @@
+using AiApplication.Application.Models;
+using AiApplication.Application.Models.OpenAI;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using AiApplication.Application.Models;
 
 namespace AiApplication.Application.Abstractions
 {
@@ -22,5 +24,20 @@ namespace AiApplication.Application.Abstractions
         /// 聊天结果。
         /// </returns>
         Task<ChatCompletionResult> ChatAsync(ChatCompletionRequest request, CancellationToken cancellationToken);
+
+
+        /// <summary>
+        /// Streaming Chat。
+        /// </summary>
+        /// <param name="request">
+        /// 聊天请求。
+        /// </param>
+        /// <param name="cancellationToken">
+        /// CancellationToken。
+        /// </param>
+        /// <returns>
+        /// Streaming Token。
+        /// </returns>
+      IAsyncEnumerable<StreamingChatChunk> StreamChatAsync(ChatCompletionRequest request, CancellationToken cancellationToken = default);
     }
 }
