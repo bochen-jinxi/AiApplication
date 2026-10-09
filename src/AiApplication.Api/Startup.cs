@@ -1,4 +1,6 @@
 using AiApplication.Application.Abstractions;
+using AiApplication.Application.Conversation;
+using AiApplication.Application.Conversation.Repositories;
 using AiApplication.Infrastructure.AI;
 using AiApplication.Infrastructure.DependencyInjection;
 using AiApplication.Infrastructure.Http;
@@ -34,7 +36,11 @@ namespace AiApplication.Api
         public void ConfigureServices(IServiceCollection services)
         {
 
-           
+           services.AddSingleton<IConversationRepository,
+                      MemoryConversationRepository>();
+
+services.AddSingleton<IConversationService,
+                      ConversationService>();
             // 注册共享的 JsonSerializerOptions，供 OpenAiResponseParser 等服务注入
             services.AddSingleton(SharedJsonOptions);
 

@@ -1,20 +1,37 @@
-using System.Text.Json.Serialization;
-
+using System.Collections.Generic;
+using AiApplication.Application.Models.OpenAI;
 namespace AiApplication.Infrastructure.AI.OpenAI.Dtos
 {
-     /// <summary>
-    /// OpenAI 消息对象。
+    /// <summary>
+    /// OpenAI Message。
     /// </summary>
-    internal sealed class OpenAiMessage
+    public sealed class OpenAiMessage
     {
         /// <summary>
-        /// 角色。
+        /// Role。
         /// </summary>
-        public string Role { get; set; }
+        public string Role
+        {
+            get;
+            set;
+        }
 
         /// <summary>
-        /// 内容。
+        /// Content。
         /// </summary>
-        public string Content { get; set; }
+        public string Content
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Tool Calls。
+        /// </summary>
+        public IList<OpenAiToolCall> ToolCalls
+        {
+            get;
+            set;
+        }
     }
 }

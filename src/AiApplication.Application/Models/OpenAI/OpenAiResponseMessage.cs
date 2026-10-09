@@ -18,10 +18,10 @@ namespace AiApplication.Application.Models.OpenAI
         /// </summary>
         public string Content { get; set; }
 
-        ///// <summary>
-        ///// Tool Calls。
-        ///// </summary>
-        //[JsonPropertyName("tool_calls")]
-        //public List<OpenAiToolCall> ToolCalls { get; set; }
+         /// <summary>
+         /// Tool Calls。
+         /// </summary>
+         [JsonPropertyName("tool_calls")]
+         public List<OpenAiToolCall> ToolCalls { get; set; }
     }
 }

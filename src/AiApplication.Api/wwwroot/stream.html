@@ -74,21 +74,45 @@ async function send()
     const decoder =
         new TextDecoder();
 
-    while(true)
-    {
-        const { done, value } =
-            await reader.read();
+        while (true)
+{
+    const { done, value } =
+        await reader.read();
 
-        if(done)
+    if (done)
+    {
+        break;
+    }
+
+    const text =
+        decoder.decode(value);
+
+    const lines =
+        text.split("\n");
+
+    for (const line of lines)
+    {
+        if (line.length === 0)
         {
-            break;
+            continue;
         }
 
-        const text =
-            decoder.decode(value);
+        if (!line.startsWith("data:"))
+        {
+            continue;
+        }
 
-        document.getElementById("result").textContent += text;
+        const message =
+            line.substring(5).trim();
+
+        if (message === "[DONE]")
+        {
+            return;
+        }
+
+        document.getElementById("result").textContent += message;
     }
+}
 
 }
 
