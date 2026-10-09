@@ -10,7 +10,7 @@ namespace AiApplication.Infrastructure.AI.OpenAI.Dtos
         /// <summary>
         /// Role。
         /// </summary>
-        public string Role
+        public string Role 
         {
             get;
             set;
