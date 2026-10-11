@@ -1,4 +1,6 @@
- 
+using AiApplication.Infrastructure.AI.OpenAI.Models;
+using System.Text.Json.Serialization;
+
 namespace AiApplication.Application.Models.OpenAI
 {
     /// <summary>
@@ -7,33 +9,24 @@ namespace AiApplication.Application.Models.OpenAI
     public sealed class OpenAiToolCall
     {
         /// <summary>
-        /// Tool Call Id。
+        /// 调用 Id。
         /// </summary>
-        public string Id
-        {
-            get;
-            set;
-        }
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
 
         /// <summary>
         /// 类型。
         /// </summary>
-        public string Type
-        {
-            get;
-            set;
-        }
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
 
         /// <summary>
         /// Function。
         /// </summary>
-        public OpenAiFunction Function
-        {
-            get;
-            set;
-        }
+        [JsonPropertyName("function")]
+        public OpenAiToolCallFunction Function { get; set; }
     }
-};
+}
 
 
- 
+

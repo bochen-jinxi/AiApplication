@@ -25,13 +25,13 @@ namespace AiApplication.Infrastructure.AI.OpenAI.Dtos
             set;
         }
 
-        /// <summary>
-        /// Tool Calls。
-        /// </summary>
-        public IList<OpenAiToolCall> ToolCalls
-        {
-            get;
-            set;
-        }
+        ///// <summary>
+        ///// Tool Calls。
+        ///// </summary>
+        //public IList<OpenAiToolCall> ToolCalls
+        //{
+        //    get;
+        //    set;
+        //}
     }
 }

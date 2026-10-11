@@ -3,11 +3,14 @@ using AiApplication.Application.Enums;
 using AiApplication.Application.Models;
 using AiApplication.Application.Models.OpenAI;
 using AiApplication.Application.Options;
+using AiApplication.Application.Tools.Models;
+using AiApplication.Infrastructure.AI.OpenAI.Builders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -40,6 +43,8 @@ namespace AiApplication.Infrastructure.AI
         /// 日志。
         /// </summary>
         private readonly ILogger<OpenAiClient> _logger;
+
+        private readonly OpenAiToolBuilder _toolBuilder;
         /// <summary>
         /// 初始化 OpenAI Client。
         /// </summary>
@@ -47,7 +52,8 @@ namespace AiApplication.Infrastructure.AI
       IAiHttpTransport httpTransport,
       IAiSerializer serializer,
       IOptions<AiOptions> options,
-      ILogger<OpenAiClient> logger)
+      ILogger<OpenAiClient> logger,
+      OpenAiToolBuilder toolBuilder)
         {
             if (options == null)
             {
@@ -67,9 +73,18 @@ namespace AiApplication.Infrastructure.AI
             _httpTransport = httpTransport ?? throw new ArgumentNullException(nameof(httpTransport));
             _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _toolBuilder = toolBuilder;
         }
 
-        
+        private List<OpenAiTool> BuildTools(IList<ToolDefinition> tools)
+        {
+            if (tools == null || tools.Count == 0)
+            {
+                return null;
+            }
+
+            return _toolBuilder.Build(tools).ToList();
+        }
 
         /// <summary>
         /// 读取 OpenAI 响应。
@@ -94,6 +109,11 @@ namespace AiApplication.Infrastructure.AI
           "choices":[{"index":0,"message":{"role":"assistant","content":"你好！我是 ChatGPT，由 OpenAI 训练的人工智能助手。\n\n我可以帮助你：\n- 解答问题、讲解知识\n- 撰写和修改文章、邮件、报告\n- 翻译、总结和提炼信息\n- 协助编程、调试代码\n- 制定学习、工作或旅行计划\n- 进行头脑风暴和日常对话\n\n我会尽力提供准确、清晰、实用的回答；如果信息可能过时或需要核实，我也会提醒你。很高兴认识你！"},"finish_reason":"stop"}],
           "usage":{"prompt_tokens":23,"completion_tokens":126,"total_tokens":149,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
            */
+
+            /*
+             {"id":"chatcmpl-ffaba82f46d3469780468615","object":"chat.completion","created":1791705457,"model":"gpt-5.6-luna","choices":[{"index":0,"message":{"role":"assistant","content":null,"tool_calls":[{"id":"call_17b05fe59ba94b358e9d801a329c5f5b","type":"function","function":{"name":"weather","arguments":"{\"City\":\"成都\",\"Days\":1}"}}]},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":70,"completion_tokens":21,"total_tokens":91,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+             
+             */
             string responseJson =
                 await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
 
@@ -157,21 +177,22 @@ namespace AiApplication.Infrastructure.AI
             return request;
         }
 
-        private OpenAiChatCompletionRequest BuildRequest(ChatCompletionRequest request)
+        private OpenAiChatCompletionRequest BuildRequest(ChatCompletionRequest chatRequest)
         {
             OpenAiChatCompletionRequest openAiRequest = new OpenAiChatCompletionRequest
             {
                 Model = _providerOptions.Model,
-                Temperature = request.Temperature,
-                TopP = request.TopP,
-                MaxTokens = request.MaxTokens,
-                Stream = request.Stream,
-                Messages = new List<OpenAiChatMessage>()
+                Temperature = chatRequest.Temperature,
+                TopP = chatRequest.TopP,
+                MaxTokens = chatRequest.MaxTokens,
+                Stream = chatRequest.Stream,
+                Messages = new List<OpenAiChatMessage>(),
+                Tools = BuildTools(chatRequest.Tools)
             };
 
-            if (request.Messages != null)
+            if (chatRequest.Messages != null)
             {
-                foreach (ChatMessage message in request.Messages)
+                foreach (ChatMessage message in chatRequest.Messages)
                 {
                     OpenAiChatMessage openAiMessage = new OpenAiChatMessage
                     {
@@ -201,7 +222,11 @@ namespace AiApplication.Infrastructure.AI
 
             OpenAiChatCompletionRequest openAiRequest = BuildRequest(request);
             /*
-             {"model":"gpt-5.6-luna","messages":[{"role":"user","content":"\u4F60\u597D\uFF0C\u8BF7\u4ECB\u7ECD\u4E00\u4E0B\u4F60\u81EA\u5DF1\u3002"}],"temperature":0.7,"max_tokens":1024,"top_p":1,"stream":false}
+             {"model":"gpt-5.6-luna","messages":[{"role":"user","content":"你好，请介绍一下你自己。"}],"temperature":0.7,"max_tokens":1024,"top_p":1,"stream":false}
+             */
+
+            /*
+             {"model":"gpt-5.6-luna","messages":[{"role":"user","content":"成都今天天气怎么样？"}],"temperature":0.7,"max_tokens":1024,"top_p":1,"stream":false,"tools":[{"type":"function","function":{"name":"weather","description":"获取指定城市天气","parameters":{"type":"object","properties":{"city":{"type":"string","description":"城市名称"},"days":{"type":"integer","description":"预测天数"}},"required":["city"]}}}]}
              */
             string requestJson = _serializer.Serialize(openAiRequest);
           
@@ -221,6 +246,13 @@ namespace AiApplication.Infrastructure.AI
     await ReadResponseAsync(responseJson);
 
             OpenAiChoice choice = response.Choices[0];
+            if (choice.FinishReason == "tool_calls")
+            {
+                List<OpenAiToolCall> toolCalls = choice.Message.ToolCalls;
+
+                // 下一节开始执行 Tool
+            }
+
             ChatCompletionResult result = new ChatCompletionResult
             {
                 Content = choice.Message.Content,

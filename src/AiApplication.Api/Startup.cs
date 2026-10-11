@@ -2,6 +2,7 @@ using AiApplication.Application.Abstractions;
 using AiApplication.Application.Conversation;
 using AiApplication.Application.Conversation.Repositories;
 using AiApplication.Infrastructure.AI;
+using AiApplication.Infrastructure.AI.OpenAI.Builders;
 using AiApplication.Infrastructure.DependencyInjection;
 using AiApplication.Infrastructure.Http;
 using AiApplication.Infrastructure.Serialization;
@@ -52,7 +53,7 @@ services.AddSingleton<IConversationService,
             services.AddSingleton<IAiSerializer, SystemTextJsonSerializer>();
 
             // 注册 OpenAI Client
-           // services.AddSingleton<OpenAiClient>();
+             services.AddSingleton<OpenAiToolBuilder, OpenAiToolBuilder>();
             services.AddSingleton<IAiClient,OpenAiClient>();
             // 注册 IAiClient
             //services.AddSingleton<IAiClient>(sp => sp.GetRequiredService<OpenAiClient>());

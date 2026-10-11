@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using AiApplication.Application.Tools.Models;
+using System.Collections.Generic;
 
 namespace AiApplication.Application.Models
 {
@@ -34,5 +35,9 @@ namespace AiApplication.Application.Models
         /// </summary>
         
         public bool Stream { get; set; }
+        /// <summary>
+        /// Tool 集合。
+        /// </summary>
+        public List<ToolDefinition> Tools { get; set; }
     }
 }

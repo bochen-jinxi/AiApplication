@@ -43,6 +43,12 @@ namespace AiApplication.Application.Models.OpenAI
         /// </summary>
         [JsonPropertyName("stream")]
         public bool Stream { get; set; }
-      
+
+        /// <summary>
+        /// Tool 集合。
+        /// </summary>
+        [JsonPropertyName("tools")]
+        public IList<OpenAiTool> Tools { get; set; }
+
     }
 }

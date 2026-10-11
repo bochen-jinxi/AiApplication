@@ -1,0 +1,228 @@
+============================================================
+ToolSchemaBuilder.Build 方法修改 - 分析结果报告
+============================================================
+
+分析时间：2026-10-11
+任务内容：修改 ToolSchemaBuilder 的 Build 方法，
+          添加 ToolSchemaProperty 的 Description 值填充，
+          和 ToolSchema 的 Required 值填充
+修改文件：src/AiApplication.Application/Tools/Schema/ToolSchemaBuilder.cs
+
+------------------------------------------------------------
+一、任务背景与需求分析
+------------------------------------------------------------
+
+用户要求：
+  在 ToolSchemaBuilder.ToolSchema（实为 Build 方法）中：
+  1. 填充 ToolSchemaProperty 的 Description 值
+  2. 填充 ToolSchema 的 Required 值
+
+需求理解：
+  Build 方法通过反射从请求类型（RequestType）构建 ToolSchema。
+  原实现仅设置了每个属性的 Type，未读取 Description 和 Required。
+  需要通过反射读取属性上的特性（Attribute）来填充这两个字段。
+
+------------------------------------------------------------
+二、相关类型与代码结构分析
+------------------------------------------------------------
+
+【1. ToolSchema（Schema 顶层结构）】
+   文件：src/AiApplication.Application/Tools/Schema/ToolSchema.cs
+   - Type：string，固定为 "object"
+   - Properties：IDictionary<string, ToolSchemaProperty>，属性字典
+   - Required：IList<string>，必填属性名列表
+   说明：Required 字段已存在但原 Build 方法未填充，始终为空列表。
+
+【2. ToolSchemaProperty（Schema 属性结构）】
+   文件：src/AiApplication.Application/Tools/Schema/ToolSchemaProperty.cs
+   - Type：string，属性类型（string/boolean/integer/number/array/object）
+   - Description：string，属性描述
+   说明：Description 字段已存在但原 Build 方法未填充，始终为 null。
+
+【3. ToolSchemaBuilder.Build（构建方法）】
+   文件：src/AiApplication.Application/Tools/Schema/ToolSchemaBuilder.cs
+   原逻辑：
+     - 创建 ToolSchema，Type="object"，Properties 和 Required 初始化为空集合
+     - 通过反射获取 requestType 的所有公共实例属性
+     - 对每个属性创建 ToolSchemaProperty，仅设置 Type（通过 TypeMapper.Map）
+     - 将属性加入 schema.Properties 字典
+   缺失：未读取 Description 特性，未收集 Required 特性
+
+【4. TypeMapper（类型映射器）】
+   文件：src/AiApplication.Application/Tools/Schema/TypeMapper.cs
+   - 将 .NET 类型映射为 JSON Schema 类型字符串
+   - 支持 string/bool/int/long/short/float/double/decimal/array，其余返回 object
+
+【5. WeatherRequest（请求类型示例）】
+   文件：src/AiApplication.Application/Weather/WeatherRequest.cs
+   - City 属性：标注 [Description("城市名称")] 和 [Required]
+   - Days 属性：标注 [Description("预测天数")]，无 [Required]
+   说明：请求类型使用 System.ComponentModel.DescriptionAttribute
+        和 System.ComponentModel.DataAnnotations.RequiredAttribute
+        来声明属性的描述与必填性。
+
+【6. 调用链路】
+   TollCallingChatController -> OpenAiToolBuilder.BuildParameters
+     -> ToolSchemaBuilder.Build(tool.RequestType)
+     -> 返回 ToolSchema，其 Properties 和 Required 被映射到
+        OpenAiFunctionParameters，最终序列化为 OpenAI API 的 function parameters JSON
+
+------------------------------------------------------------
+三、修改方案
+------------------------------------------------------------
+
+在 ToolSchemaBuilder.Build 方法的 foreach 循环中，对每个属性：
+
+1. 读取 Description：
+   使用 property.GetCustomAttribute<DescriptionAttribute>()
+   获取 System.ComponentModel.DescriptionAttribute
+   若存在，将 descriptionAttribute.Description 赋值给 schemaProperty.Description
+
+2. 读取 Required：
+   使用 property.GetCustomAttribute<RequiredAttribute>()
+   获取 System.ComponentModel.DataAnnotations.RequiredAttribute
+   若存在，将 property.Name 加入 schema.Required 列表
+
+3. 新增 using 引用：
+   using System.ComponentModel;          // DescriptionAttribute
+   using System.ComponentModel.DataAnnotations;  // RequiredAttribute
+
+------------------------------------------------------------
+四、修改后的完整代码
+------------------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Reflection;
+
+namespace AiApplication.Application.Tools.Schema
+{
+    public static class ToolSchemaBuilder
+    {
+        public static ToolSchema Build(Type requestType)
+        {
+            if (requestType == null)
+            {
+                throw new ArgumentNullException(nameof(requestType));
+            }
+
+            ToolSchema schema = new ToolSchema
+            {
+                Type = "object",
+                Properties = new Dictionary<string, ToolSchemaProperty>(),
+                Required = new List<string>()
+            };
+
+            PropertyInfo[] properties = requestType.GetProperties(
+                BindingFlags.Instance |
+                BindingFlags.Public);
+
+            foreach (PropertyInfo property in properties)
+            {
+                ToolSchemaProperty schemaProperty =
+                    new ToolSchemaProperty();
+
+                schemaProperty.Type =
+                    TypeMapper.Map(property.PropertyType);
+
+                // 读取 [Description] 特性，填充属性描述
+                DescriptionAttribute descriptionAttribute =
+                    property.GetCustomAttribute<DescriptionAttribute>();
+                if (descriptionAttribute != null)
+                {
+                    schemaProperty.Description =
+                        descriptionAttribute.Description;
+                }
+
+                // 读取 [Required] 特性，收集必填属性名
+                RequiredAttribute requiredAttribute =
+                    property.GetCustomAttribute<RequiredAttribute>();
+                if (requiredAttribute != null)
+                {
+                    schema.Required.Add(property.Name);
+                }
+
+                schema.Properties.Add(
+                    property.Name,
+                    schemaProperty);
+            }
+
+            return schema;
+        }
+    }
+}
+
+------------------------------------------------------------
+五、以 WeatherRequest 为例的预期输出
+------------------------------------------------------------
+
+输入类型：WeatherRequest
+  属性 City：[Description("城市名称")] [Required] string
+  属性 Days：[Description("预测天数")] int?
+
+构建结果 ToolSchema：
+{
+  "type": "object",
+  "properties": {
+    "City": {
+      "type": "string",
+      "description": "城市名称"
+    },
+    "Days": {
+      "type": "integer",
+      "description": "预测天数"
+    }
+  },
+  "required": ["City"]
+}
+
+说明：
+  - City 有 [Required]，故 "City" 出现在 required 数组中
+  - Days 无 [Required]，故不出现在 required 数组中
+  - 两个属性都有 [Description]，description 字段被正确填充
+  - Days 为 int?（Nullable<int>），TypeMapper 通过 Nullable.GetUnderlyingType 处理，映射为 "integer"
+
+------------------------------------------------------------
+六、编译验证
+------------------------------------------------------------
+
+执行命令：dotnet build "src/AiApplication.Application/AiApplication.Application.csproj"
+构建结果：已成功生成
+警告数：0
+错误数：0
+
+结论：修改后代码编译通过，无任何警告或错误。
+
+------------------------------------------------------------
+七、设计评价与注意事项
+------------------------------------------------------------
+
+1. 特性选择合理性：
+   - DescriptionAttribute（System.ComponentModel）是 .NET 标准的描述特性，
+     广泛用于属性、枚举等成员的描述声明，选择合理。
+   - RequiredAttribute（System.ComponentModel.DataAnnotations）是数据注解标准特性，
+     常用于模型验证表示必填，选择合理。
+
+2. 与现有代码一致性：
+   - WeatherRequest 已使用这两个特性，说明项目已有此约定
+   - 修改使 Build 方法与请求类型的特性声明保持语义一致
+
+3. 对 OpenAI API 的影响：
+   - OpenAI Function Calling 的 parameters JSON Schema 标准中，
+     "description" 和 "required" 是标准字段
+   - 填充后可使 AI 模型更准确地理解参数含义与必填约束，
+     提升工具调用的准确率
+
+4. 潜在扩展：
+   - 如需支持枚举描述（EnumMember/Description），可在 TypeMapper 或 Build 中扩展
+   - 如需支持数组元素的 items schema，可进一步扩展 ToolSchemaProperty
+   - 如需支持嵌套对象的 properties，可递归调用 Build
+
+5. 线程安全性：
+   - ToolSchemaBuilder 为静态类，Build 为静态方法，无共享状态，线程安全
+
+============================================================
+报告结束
+============================================================

@@ -1,3 +1,6 @@
+using AiApplication.Application.Tools.Schema;
+using System.Text.Json.Serialization;
+
 namespace AiApplication.Application.Models.OpenAI
 {
     /// <summary>
@@ -8,19 +11,26 @@ namespace AiApplication.Application.Models.OpenAI
         /// <summary>
         /// Function 名称。
         /// </summary>
-        public string Name
-        {
-            get;
-            set;
-        }
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
 
         /// <summary>
-        /// Function 参数(JSON)。
+        /// Function 描述。
         /// </summary>
-        public string Arguments
-        {
-            get;
-            set;
-        }
+        [JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        /// <summary>
+        /// 参数。
+        /// </summary>
+        [JsonPropertyName("parameters")]
+        public OpenAiFunctionParameters Parameters { get; set; }
+    }
+
+    /// <summary>
+    /// OpenAI Function Parameters。
+    /// </summary>
+    public sealed class OpenAiFunctionParameters : ToolSchema
+    {
     }
 }
