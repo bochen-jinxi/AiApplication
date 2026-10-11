@@ -86,7 +86,14 @@ namespace AiApplication.Infrastructure.AI
             {
                 throw new ArgumentNullException(nameof(responseMessage));
             }
-
+            /*
+           {"id":"chatcmpl-da76ee9d31ed4867b83ad0ef",
+          "object":"chat.completion",
+          "created":1790847129,
+          "model":"gpt-5.6-luna",
+          "choices":[{"index":0,"message":{"role":"assistant","content":"你好！我是 ChatGPT，由 OpenAI 训练的人工智能助手。\n\n我可以帮助你：\n- 解答问题、讲解知识\n- 撰写和修改文章、邮件、报告\n- 翻译、总结和提炼信息\n- 协助编程、调试代码\n- 制定学习、工作或旅行计划\n- 进行头脑风暴和日常对话\n\n我会尽力提供准确、清晰、实用的回答；如果信息可能过时或需要核实，我也会提醒你。很高兴认识你！"},"finish_reason":"stop"}],
+          "usage":{"prompt_tokens":23,"completion_tokens":126,"total_tokens":149,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+           */
             string responseJson =
                 await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
 
@@ -197,14 +204,7 @@ namespace AiApplication.Infrastructure.AI
              {"model":"gpt-5.6-luna","messages":[{"role":"user","content":"\u4F60\u597D\uFF0C\u8BF7\u4ECB\u7ECD\u4E00\u4E0B\u4F60\u81EA\u5DF1\u3002"}],"temperature":0.7,"max_tokens":1024,"top_p":1,"stream":false}
              */
             string requestJson = _serializer.Serialize(openAiRequest);
-            /*
-             {"id":"chatcmpl-da76ee9d31ed4867b83ad0ef",
-            "object":"chat.completion",
-            "created":1790847129,
-            "model":"gpt-5.6-luna",
-            "choices":[{"index":0,"message":{"role":"assistant","content":"你好！我是 ChatGPT，由 OpenAI 训练的人工智能助手。\n\n我可以帮助你：\n- 解答问题、讲解知识\n- 撰写和修改文章、邮件、报告\n- 翻译、总结和提炼信息\n- 协助编程、调试代码\n- 制定学习、工作或旅行计划\n- 进行头脑风暴和日常对话\n\n我会尽力提供准确、清晰、实用的回答；如果信息可能过时或需要核实，我也会提醒你。很高兴认识你！"},"finish_reason":"stop"}],
-            "usage":{"prompt_tokens":23,"completion_tokens":126,"total_tokens":149,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
-             */
+          
 
             var requestMessage = BuildHttpRequestMessage(_providerOptions.BaseUrl,
                  requestJson,
@@ -303,7 +303,9 @@ namespace AiApplication.Infrastructure.AI
                 {
                     continue;
                 }
-                /*line = data: {"id":"chatcmpl-8485248bcc6541e09b4377d2","object":"chat.completion.chunk","created":1791363933,"model":"gpt-5.6-luna","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}*/
+                /*第一个流内容line = data: {"id":"chatcmpl-8485248bcc6541e09b4377d2","object":"chat.completion.chunk","created":1791363933,"model":"gpt-5.6-luna","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}*/
+                /*第二个流内容line = data:{ "id":"chatcmpl-9fb335d114054a8ba75d8639","object":"chat.completion.chunk","created":1791685316,"model":"gpt-6-luna","choices":[{ "index":0,"delta":{ "content":"你好"},"finish_reason":null}]}*/
+
                 string json =
                     line.Substring(5).Trim();
 
@@ -325,10 +327,12 @@ namespace AiApplication.Infrastructure.AI
                 {
                     continue;
                 }
-
+                //第一个内容{"index":0,"delta":{"role":"assistant"},"finish_reason":null}
+                //第二个内容{ "index":0,"delta":{ "content":"你好"},"finish_reason":null}
                 OpenAiChunkChoice choice =
                     chunk.Choices[0];
-
+                //第一个内容{"role":"assistant"}
+                //第二个内容{ "content":"你好"}
                 OpenAiDelta delta =
                     choice.Delta;
 
