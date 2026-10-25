@@ -1,11 +1,22 @@
-//using System;
+using System.Collections.Generic;
 
-//namespace AiApplication.Application.Abstractions.Tools
-//{
-//    public interface IToolRegistry
-//    {
-//        ITool GetTool(string toolName);
+namespace AiApplication.Application.Abstractions.Tools
+{
+    /// <summary>
+    /// Tool 注册中心。
+    /// </summary>
+    public interface IToolRegistry
+    {
+        /// <summary>
+        /// 获取所有 Tool。
+        /// </summary>
+        IReadOnlyCollection<ITool> Tools { get; }
 
-//        bool TryGetTool(string toolName, out ITool tool);
-//    }
-//}
+        /// <summary>
+        /// 根据名称获取 Tool。
+        /// </summary>
+        /// <param name="toolName">Tool 名称。</param>
+        /// <returns>Tool。</returns>
+        ITool Get(string toolName);
+    }
+}

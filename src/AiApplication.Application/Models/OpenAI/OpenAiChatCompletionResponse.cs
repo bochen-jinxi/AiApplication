@@ -26,7 +26,7 @@ public sealed class OpenAiChatCompletionResponse
     /// <summary>
     /// 返回结果。
     /// </summary>
-    public List<OpenAiChoice> Choices { get; set; }
+    public List<OpenAiChatCompletionChoice> Choices { get; set; }
 
     /// <summary>
     /// Token 使用情况。

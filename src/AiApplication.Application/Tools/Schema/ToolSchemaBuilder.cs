@@ -9,7 +9,7 @@ namespace AiApplication.Application.Tools.Schema
     /// <summary>
     /// Tool Schema Builder。
     /// </summary>
-    public static  class ToolSchemaBuilder
+    public static class ToolSchemaBuilder
     {
         /// <summary>
         /// 构建 Schema。

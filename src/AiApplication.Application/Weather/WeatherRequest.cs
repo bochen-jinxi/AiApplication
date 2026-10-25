@@ -12,7 +12,6 @@ namespace AiApplication.Application.Weather
         [Required]
         public string City { get; set; }
 
-        [Description("预测天数")]
-        public int? Days { get; set; }
+         
     }
 }

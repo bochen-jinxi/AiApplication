@@ -1,49 +1,65 @@
-//using System.Collections.Generic;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using AiApplication.Application.Abstractions;
+using AiApplication.Application.Abstractions.Tools;
+using AiApplication.Application.Tools;
 
-//namespace AiApplication.Infrastructure.Tools;
+namespace AiApplication.Infrastructure.Tools
+{
+    /// <summary>
+    /// Tool 执行器。
+    /// </summary>
+    public sealed class ToolExecutor : IToolExecutor
+    {
+        private readonly IToolRegistry _toolRegistry;
+        private readonly IAiSerializer _serializer;
 
-//public class ToolExecutor
-//{
+        public ToolExecutor(
+            IToolRegistry toolRegistry,
+            IAiSerializer serializer)
+        {
+            _toolRegistry = toolRegistry ?? throw new ArgumentNullException(nameof(toolRegistry));
+            _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
+        }
 
-//    private readonly IReadOnlyDictionary<string, ITool> _tools;
+        /// <summary>
+        /// 执行 Tool。
+        /// </summary>
+        /// <param name="context">执行上下文。</param>
+        /// <param name="cancellationToken">取消令牌。</param>
+        /// <returns>ToolResult。</returns>
+        public async Task<ToolResult> ExecuteAsync(
+            ToolExecutionContext context,
+            CancellationToken cancellationToken = default)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
 
-//    public ToolExecutor(
-//        IEnumerable<ITool> tools)
-//    {
-//        Dictionary<string, ITool> dictionary =
-//            new Dictionary<string, ITool>(
-//                StringComparer.OrdinalIgnoreCase);
+            ITool tool = _toolRegistry.Get(context.ToolName);
 
-//        foreach (ITool tool in tools)
-//        {
-//            if (dictionary.ContainsKey(tool.Name))
-//            {
-//                throw new ToolException(
-//                    $"Tool '{tool.Name}' 已经存在。");
-//            }
+            if (tool == null)
+            {
+                return ToolResult.Fail($"未找到 Tool：{context.ToolName}");
+            }
 
-//            dictionary.Add(
-//                tool.Name,
-//                tool);
-//        }
+            try
+            {
+                ToolResult result = await tool.ExecuteAsync(
+                    context,
+                    cancellationToken);
 
-//        _tools = dictionary;
-//    }
+                return result;
+            }
+            catch (Exception exception)
+            {
+                return ToolResult.Fail(exception.Message);
+            }
+        }
 
-//    public async Task<ToolResult> ExecuteAsync(
-//        string toolName,
-//        ToolContext context)
-//    {
-//        if (!_tools.TryGetValue(
-//                toolName,
-//                out ITool tool))
-//        {
-//            throw new ToolException(
-//                $"Tool '{toolName}' 不存在。");
-//        }
 
-//        return await tool.ExecuteAsync(
-//            context)
-//            .ConfigureAwait(false);
-//    }
-//}
+      
+    }
+}

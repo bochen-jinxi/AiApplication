@@ -5,7 +5,7 @@ namespace AiApplication.Application.Models.OpenAI
     /// <summary>
     /// OpenAI 返回结果。
     /// </summary>
-    public sealed class OpenAiChoice
+    public sealed class OpenAiChatCompletionChoice
     {
         /// <summary>
         /// 返回序号。
@@ -15,8 +15,8 @@ namespace AiApplication.Application.Models.OpenAI
         /// <summary>
         /// 消息。
         /// </summary>
-        public OpenAiResponseMessage Message { get; set; }
-
+        public OpenAiChatMessage Message { get; set; }
+               
         /// <summary>
         /// 结束原因。
         /// </summary>
